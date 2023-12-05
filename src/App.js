@@ -1,25 +1,64 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import "./App.css";
 
 function App() {
+  const [order, setorder] = useState([]);
+  const [isDeactivating, setisDeactivating] = useState(false);
+
+  const config = [
+    [1, 1, 1],
+    [1, 0, 1],
+    [1, 1, 1],
+  ];
+
+  const activatedCells = (index) => {
+    let neworder = [...order, index];
+    setorder(neworder);
+    if (neworder.length === config.flat().length) deactivateCells();
+  };
+
+  const deactivateCells = () => {
+    setisDeactivating(true);
+    const timer = setInterval(() => {
+      setorder((originalOrder) => {
+        const newOrder = originalOrder.slice();
+        newOrder.pop();
+        if (newOrder.length === 0) {
+          clearInterval(timer);
+          setisDeactivating(false);
+        }
+        return newOrder;
+      });
+    }, 300);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="grid">
+        {config.flat(1).map((e, index) => {
+          return (
+            <Cell
+              key={index}
+              isDisabled={order.includes(index) || isDeactivating}
+              filled={order.includes(index)}
+              onClick={() => activatedCells(index)}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
+
+const Cell = ({ filled, onClick, isDisabled }) => {
+  return (
+    <button
+      type="button"
+      disabled={isDisabled}
+      onClick={onClick}
+      className={filled ? "cell-activated cell" : "cell"}
+    ></button>
+  );
+};
 
 export default App;
